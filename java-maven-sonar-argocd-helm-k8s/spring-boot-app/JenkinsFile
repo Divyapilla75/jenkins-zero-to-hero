@@ -8,21 +8,26 @@ pipeline {
   stages {
     stage('Cleanup Workspace') {
       steps {
-        sh 'git clean -fdx' // Cleans untracked files
-        sh 'rm -rf /var/lib/jenkins/workspace/ultimate-demo/*' // Clears workspace before checkout
+        sh '''
+            sudo chattr -i -R /var/lib/jenkins/workspace/ultimate-demo || true
+            sudo rm -rf /var/lib/jenkins/workspace/ultimate-demo/* || true
+        ''' // Clears workspace before checkout and removes immutable file attributes if any
       }
     }
     stage('Checkout') {
       steps {
         sh 'echo passed'
         git branch: 'main', url: 'https://github.com/Divyapilla75/Jenkins-Zero-To-Hero.git'
+        sh '''
+            git reset --hard
+            git clean -fdx
+        ''' // Ensures all files are cleaned before fetching updates
       }
     }
     stage('Build and Test') {
       steps {
         sh 'ls -ltr'
-        // build the project and create a JAR file
-        sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
+        sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package' // Build the project and create a JAR file
       }
     }
     stage('Static Code Analysis') {
