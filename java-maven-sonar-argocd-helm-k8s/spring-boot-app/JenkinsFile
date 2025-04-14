@@ -6,10 +6,16 @@ pipeline {
     }
   }
   stages {
+    stage('Cleanup Workspace') {
+      steps {
+        sh 'git clean -fdx' // Cleans untracked files
+        sh 'rm -rf /var/lib/jenkins/workspace/ultimate-demo/*' // Clears workspace before checkout
+      }
+    }
     stage('Checkout') {
       steps {
         sh 'echo passed'
-        //git branch: 'main', url: 'https://github.com/Divyapilla75/Jenkins-Zero-To-Hero.git'
+        git branch: 'main', url: 'https://github.com/Divyapilla75/Jenkins-Zero-To-Hero.git'
       }
     }
     stage('Build and Test') {
@@ -32,7 +38,6 @@ pipeline {
     stage('Build and Push Docker Image') {
       environment {
         DOCKER_IMAGE = "divyapilla75/ultimate-cicd:${BUILD_NUMBER}"
-        // DOCKERFILE_LOCATION = "java-maven-sonar-argocd-helm-k8s/spring-boot-app/Dockerfile"
         REGISTRY_CREDENTIALS = credentials('docker-cred')
       }
       steps {
